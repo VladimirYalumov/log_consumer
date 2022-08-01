@@ -9,6 +9,7 @@ import (
 	"log_consumer/mongo"
 	"log_consumer/rabbit"
 	"strconv"
+	"sync"
 )
 
 const queueCount = 5
@@ -83,6 +84,7 @@ func init() {
 
 // consumer
 func main() {
+	var wg sync.WaitGroup
 	// declare all queues
 	for i, consumerInfo := range consumersArray {
 		LogConsumer[i] = Consumer{}
@@ -90,15 +92,18 @@ func main() {
 		mainError = LogConsumer[i].CreateQueue(consumerInfo.QueueName)
 		panicIfNeed(mainError, "declare queue: "+consumerInfo.QueueName)
 		for j := 0; j < consumerInfo.ConsumersCount; j++ {
-			go LogConsumer[i].Execute(consumerInfo.QueueName + "_" + strconv.Itoa(j))
+			wg.Add(1)
+			go LogConsumer[i].Execute(&wg, consumerInfo.QueueName+"_"+strconv.Itoa(j))
 		}
 	}
+	wg.Wait()
 
 	mainError = RClient.CloseConnection()
 	panicIfNeed(mainError, "log_consumer stopped")
 }
 
-func (consumer *Consumer) Execute(name string) {
+func (consumer *Consumer) Execute(wg *sync.WaitGroup, name string) {
+	defer wg.Done()
 	var distributeErr error
 	msgs, err := consumer.Client.Chanel.Consume(
 		consumer.Queue.Name, // queue
