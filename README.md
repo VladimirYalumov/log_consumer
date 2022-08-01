@@ -36,7 +36,7 @@ In the package logger you can find the pusher what put message to the rabbit
         "second_num": 2
     }'
 </pre>
-And watch the result in the same mongo client?
+And watch the result in the same mongo client)
 
 Configs
 in the block config (if you use my environment) you can't change anything
