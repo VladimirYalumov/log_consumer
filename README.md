@@ -40,7 +40,9 @@ And watch the result in the same mongo client)
 
 Configs
 in the block config (if you use my environment) you can't change anything
+
 In the block mongo you must add your own logical mongo databases
+
 And add all routes you have in project
 Example:
 <pre>
